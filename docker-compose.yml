@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+    backend:
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        ports:
+            - "8000:8000"
+        environment:
+            API_SECRET: ${API_SECRET}
+        restart: always
+
+    frontend:
+        build:
+            context: ./www
+            dockerfile: Dockerfile
+        ports:
+            - "3000:3000"
+        environment:
+            NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+            NEXT_PUBLIC_API_KEY: ${NEXT_PUBLIC_API_KEY}
+        restart: always

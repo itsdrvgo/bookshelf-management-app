@@ -1,0 +1,15 @@
+**/.env
+**/.env.local
+**/.env.development
+**/.env.production
+**/.vscode
+**/.venv
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/build
+**/bun.lock
+**/uv.lock
+Dockerfile
+docker-compose.yml
