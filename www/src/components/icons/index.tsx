@@ -13,6 +13,7 @@ import {
     ChevronLast,
     ChevronLeft,
     ChevronRight,
+    ChevronsLeft,
     ChevronsRight,
     ChevronsUpDown,
     ChevronUp,
@@ -82,6 +83,7 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
+    ChevronsLeft,
     LibraryBig,
     Construction,
     ExternalLink,

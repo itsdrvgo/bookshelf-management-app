@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 class Book(BaseModel):
     id: int
@@ -14,5 +15,5 @@ class CreateBook(BaseModel):
     genre: str = Field(..., min_length=1)
 
 class SortBooksRequest(BaseModel):
-    books: list[Book]
+    books: Optional[list[Book]] = None
     sort_by: str

@@ -1,8 +1,13 @@
 "use client";
 
-import { BOOKS_SORT_OPTIONS } from "@/config/const";
+import { BOOKS_SORT_OPTIONS, DEFAULT_PAGINATION_PAGE } from "@/config/const";
 import { convertValueToLabel } from "@/lib/utils";
-import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
+import {
+    parseAsInteger,
+    parseAsString,
+    parseAsStringLiteral,
+    useQueryState,
+} from "nuqs";
 import { useEffect, useState } from "react";
 import { BookManageForm } from "../globals/forms";
 import { Icons } from "../icons";
@@ -33,6 +38,10 @@ export function BooksToolbar() {
             "none"
         )
     );
+    const [, setPage] = useQueryState(
+        "page",
+        parseAsInteger.withDefault(DEFAULT_PAGINATION_PAGE)
+    );
     const [searchValue, setSearchValue] = useQueryState(
         "search",
         parseAsString.withDefault("")
@@ -59,9 +68,10 @@ export function BooksToolbar() {
                     type="search"
                     placeholder="Search by title..."
                     value={localSearchValue}
-                    onChange={(event) =>
-                        setLocalSearchValue(event.target.value)
-                    }
+                    onChange={(event) => {
+                        setLocalSearchValue(event.target.value);
+                        setPage(DEFAULT_PAGINATION_PAGE);
+                    }}
                     onKeyDown={(event) => {
                         if (event.key === "Enter") {
                             event.preventDefault();

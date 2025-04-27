@@ -1,12 +1,22 @@
 "use client";
 
-import { BOOKS_SORT_OPTIONS } from "@/config/const";
+import {
+    BOOKS_SORT_OPTIONS,
+    DEFAULT_PAGINATION_PAGE,
+    DEFAULT_PAGINATION_PAGE_SIZE,
+} from "@/config/const";
+import { PaginationParams } from "@/lib/queries/book";
 import { useBooks } from "@/lib/react-query";
 import { cn, sanitizeError } from "@/lib/utils";
 import { Book } from "@/lib/validations";
 import Image from "next/image";
 import Link from "next/link";
-import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
+import {
+    parseAsInteger,
+    parseAsString,
+    parseAsStringLiteral,
+    useQueryState,
+} from "nuqs";
 import { useState } from "react";
 import { BookManageForm } from "../globals/forms";
 import { Icons } from "../icons";
@@ -53,9 +63,26 @@ export function BooksPage({ className, ...props }: GenericProps) {
         )
     );
     const [search] = useQueryState("search", parseAsString.withDefault(""));
+    const [page, setPage] = useQueryState(
+        "page",
+        parseAsInteger.withDefault(DEFAULT_PAGINATION_PAGE)
+    );
+    const [pageSize] = useQueryState(
+        "pageSize",
+        parseAsInteger.withDefault(DEFAULT_PAGINATION_PAGE_SIZE)
+    );
+
+    const pagination: PaginationParams = {
+        page,
+        page_size: pageSize,
+    };
 
     const { useScan } = useBooks();
-    const { data, error, isPending } = useScan({ sortBy, search });
+    const { data, error, isPending } = useScan({ sortBy, search, pagination });
+
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+    };
 
     if (error)
         return (
@@ -83,7 +110,7 @@ export function BooksPage({ className, ...props }: GenericProps) {
             </div>
         );
 
-    if (!isPending && data?.length === 0)
+    if (!isPending && data?.books.length === 0)
         return (
             <div className="flex justify-center">
                 <EmptyPlaceholder>
@@ -107,20 +134,75 @@ export function BooksPage({ className, ...props }: GenericProps) {
         );
 
     return (
-        <section
-            className={cn(
-                "grid grid-cols-2 gap-5 md:grid-cols-4 xl:grid-cols-5",
-                className
-            )}
-            {...props}
-        >
-            {isPending &&
-                Array.from({ length: 20 }).map((_, i) => (
-                    <Skeleton key={i} className="aspect-[3/4] rounded-lg" />
-                ))}
+        <div className="space-y-8">
+            <section
+                className={cn(
+                    "grid grid-cols-2 gap-5 md:grid-cols-4 xl:grid-cols-5",
+                    className
+                )}
+                {...props}
+            >
+                {isPending &&
+                    Array.from({ length: 20 }).map((_, i) => (
+                        <Skeleton key={i} className="aspect-[3/4] rounded-lg" />
+                    ))}
 
-            {data?.map((book) => <BookCard key={book.id} book={book} />)}
-        </section>
+                {data?.books.map((book) => (
+                    <BookCard key={book.id} book={book} />
+                ))}
+            </section>
+
+            {data?.pagination && (
+                <div className="mt-8 flex justify-center">
+                    <div className="flex items-center space-x-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(1)}
+                            disabled={!data.pagination.has_prev || isPending}
+                        >
+                            <Icons.ChevronsLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                handlePageChange(data.pagination.page - 1)
+                            }
+                            disabled={!data.pagination.has_prev || isPending}
+                        >
+                            <Icons.ChevronLeft className="h-4 w-4" />
+                        </Button>
+
+                        <span className="text-sm">
+                            Page {data.pagination.page} of{" "}
+                            {data.pagination.total_pages}
+                        </span>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                handlePageChange(data.pagination.page + 1)
+                            }
+                            disabled={!data.pagination.has_next || isPending}
+                        >
+                            <Icons.ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                handlePageChange(data.pagination.total_pages)
+                            }
+                            disabled={!data.pagination.has_next || isPending}
+                        >
+                            <Icons.ChevronsRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -137,8 +219,21 @@ function BookCard({ book }: { book: Book }) {
         )
     );
     const [search] = useQueryState("search", parseAsString.withDefault(""));
+    const [page] = useQueryState(
+        "page",
+        parseAsInteger.withDefault(DEFAULT_PAGINATION_PAGE)
+    );
+    const [pageSize] = useQueryState(
+        "pageSize",
+        parseAsInteger.withDefault(DEFAULT_PAGINATION_PAGE_SIZE)
+    );
 
-    const { refetch } = useScan({ sortBy, search });
+    const pagination: PaginationParams = {
+        page,
+        page_size: pageSize,
+    };
+
+    const { refetch } = useScan({ sortBy, search, pagination });
     const { mutateAsync, isPending } = useDelete();
 
     const handleDelete = async () => {
@@ -197,14 +292,14 @@ function BookCard({ book }: { book: Book }) {
                                     onClick={() => setIsViewModalOpen(true)}
                                 >
                                     <Icons.Eye className="size-4" />
-                                    <span>View</span>
+                                    View
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem
                                     onClick={() => setIsEditModalOpen(true)}
                                 >
                                     <Icons.Pencil className="size-4" />
-                                    <span>Edit</span>
+                                    Edit
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
 
@@ -214,7 +309,7 @@ function BookCard({ book }: { book: Book }) {
                                 onClick={() => setIsDeleteModalOpen(true)}
                             >
                                 <Icons.Trash2 className="size-4" />
-                                <span>Delete</span>
+                                Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

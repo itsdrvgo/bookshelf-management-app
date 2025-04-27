@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { queries } from "../queries";
+import { BooksPaginatedResponse, PaginationParams } from "../queries/book";
 import { handleClientError, parseToJSON } from "../utils";
 import { Book, CreateBook, createBookSchema, UpdateBook } from "../validations";
 
@@ -11,16 +12,29 @@ export function useBooks() {
     const useScan = ({
         sortBy = "none",
         search,
+        pagination,
         initialData,
     }: {
         sortBy?: string;
         search?: string;
-        initialData?: Book[];
+        pagination?: PaginationParams;
+        initialData?: BooksPaginatedResponse;
     } = {}) => {
         return useQuery({
-            queryKey: ["books", "scan", sortBy, search],
+            queryKey: [
+                "books",
+                "scan",
+                sortBy,
+                search,
+                pagination?.page,
+                pagination?.page_size,
+            ],
             queryFn: async () => {
-                const data = await queries.book.scan({ sortBy, search });
+                const data = await queries.book.scan({
+                    sortBy,
+                    search,
+                    pagination,
+                });
                 return data;
             },
             initialData,

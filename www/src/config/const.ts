@@ -7,3 +7,6 @@ export const DEFAULT_MESSAGES = {
 } as const;
 
 export const BOOKS_SORT_OPTIONS = ["title", "author", "year"] as const;
+
+export const DEFAULT_PAGINATION_PAGE = 1 as const;
+export const DEFAULT_PAGINATION_PAGE_SIZE = 20 as const;

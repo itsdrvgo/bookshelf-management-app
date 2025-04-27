@@ -13,11 +13,21 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { BOOKS_SORT_OPTIONS } from "@/config/const";
+import {
+    BOOKS_SORT_OPTIONS,
+    DEFAULT_PAGINATION_PAGE,
+    DEFAULT_PAGINATION_PAGE_SIZE,
+} from "@/config/const";
+import { PaginationParams } from "@/lib/queries/book";
 import { useBooks } from "@/lib/react-query";
 import { Book, CreateBook, createBookSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
+import {
+    parseAsInteger,
+    parseAsString,
+    parseAsStringLiteral,
+    useQueryState,
+} from "nuqs";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -38,6 +48,19 @@ export function BookManageForm({ book, onFinish }: PageProps) {
         )
     );
     const [search] = useQueryState("search", parseAsString.withDefault(""));
+    const [page] = useQueryState(
+        "page",
+        parseAsInteger.withDefault(DEFAULT_PAGINATION_PAGE)
+    );
+    const [pageSize] = useQueryState(
+        "pageSize",
+        parseAsInteger.withDefault(DEFAULT_PAGINATION_PAGE_SIZE)
+    );
+
+    const pagination: PaginationParams = {
+        page,
+        page_size: pageSize,
+    };
 
     const form = useForm<CreateBook>({
         resolver: zodResolver(createBookSchema),
@@ -50,7 +73,7 @@ export function BookManageForm({ book, onFinish }: PageProps) {
     });
 
     const { useScan, useCreate, useJSONCreate, useUpdate } = useBooks();
-    const { refetch } = useScan({ search, sortBy });
+    const { refetch } = useScan({ search, sortBy, pagination });
     const { mutateAsync: createBooks, isPending: isCreating } = useCreate();
     const { mutateAsync: updateBooks, isPending: isUpdating } = useUpdate();
     const { mutateAsync: createBulkBooks, isPending: isBulkCreating } =
