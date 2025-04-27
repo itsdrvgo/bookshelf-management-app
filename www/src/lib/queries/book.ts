@@ -51,10 +51,7 @@ class BookQuery {
                 ResponseData<BooksPaginatedResponse>
             >(
                 "/books/sort",
-                {
-                    sort_by: sortBy,
-                    // No longer sending the books array since the backend uses all books from database
-                },
+                { sort_by: sortBy },
                 {
                     params: {
                         search,

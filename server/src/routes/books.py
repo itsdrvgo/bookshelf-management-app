@@ -31,11 +31,9 @@ def get_books(
     if search:
         books = filter_books_by_search(books, search)
     
-    # Calculate pagination
     total_books = len(books)
-    total_pages = (total_books + page_size - 1) // page_size  # Ceiling division
+    total_pages = (total_books + page_size - 1) // page_size
     
-    # Get paginated subset
     start_idx = (page - 1) * page_size
     end_idx = min(start_idx + page_size, total_books)
     paginated_books = books[start_idx:end_idx]
@@ -81,14 +79,11 @@ def sort_books(
     if (key not in ["title", "author", "year"]):
         raise HTTPException(status_code=400, detail="Invalid sort_by key")
     
-    # Use all books from the database instead of books sent from the frontend
     books = books_db.copy()
     
-    # Apply search filter if provided
     if search:
         books = filter_books_by_search(books, search)
     
-    # Sort the books
     n = len(books)
     for i in range(n):
         for j in range(0, n-i-1):
@@ -97,11 +92,9 @@ def sort_books(
             if str(a).lower() > str(b).lower():
                 books[j], books[j+1] = books[j+1], books[j]
     
-    # Calculate pagination
     total_books = len(books)
-    total_pages = (total_books + page_size - 1) // page_size  # Ceiling division
+    total_pages = (total_books + page_size - 1) // page_size
     
-    # Get paginated subset
     start_idx = (page - 1) * page_size
     end_idx = min(start_idx + page_size, total_books)
     paginated_books = books[start_idx:end_idx]
