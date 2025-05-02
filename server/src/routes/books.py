@@ -2,7 +2,7 @@ from fastapi import HTTPException, Query
 from ..router import router
 from ..lib.validations.book import Book, CreateBook, SortBooksRequest
 from ..lib.db import books_db, book_id_counter
-from ..lib.utils import get_book_index, format_response
+from ..lib.utils import get_book_index, format_response, merge_sort, bubble_sort
 from typing import Optional
 from ..config.const import DEFAULT_PAGINATION_PAGE, DEFAULT_PAGINATION_PAGE_SIZE
 
@@ -84,13 +84,8 @@ def sort_books(
     if search:
         books = filter_books_by_search(books, search)
     
-    n = len(books)
-    for i in range(n):
-        for j in range(0, n-i-1):
-            a = getattr(books[j], key)
-            b = getattr(books[j+1], key)
-            if str(a).lower() > str(b).lower():
-                books[j], books[j+1] = books[j+1], books[j]
+    books = merge_sort(books, key)
+    # books = bubble_sort(books, key)
     
     total_books = len(books)
     total_pages = (total_books + page_size - 1) // page_size
