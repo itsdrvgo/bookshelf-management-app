@@ -13,6 +13,21 @@ def get_book_index(book_id: int) -> int:
             return index
     return -1
 
+def filter_books_by_search(books, search_term=None):
+    if not search_term:
+        return books
+    
+    search_term = search_term.lower()
+    filtered_books = []
+    
+    for book in books:
+        if (search_term in book.title.lower() or 
+            search_term in book.author.lower() or 
+            search_term in str(book.year).lower()):
+            filtered_books.append(book)
+            
+    return filtered_books
+
 def format_response(data=None, success=True, message=None):
     response = {"success": success}
     if message:

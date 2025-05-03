@@ -2,24 +2,9 @@ from fastapi import HTTPException, Query
 from ..router import router
 from ..lib.validations.book import Book, CreateBook, SortBooksRequest
 from ..lib.db import books_db, book_id_counter
-from ..lib.utils import get_book_index, format_response, merge_sort, bubble_sort
+from ..lib.utils import get_book_index, format_response, merge_sort, bubble_sort, filter_books_by_search
 from typing import Optional
 from ..config.const import DEFAULT_PAGINATION_PAGE, DEFAULT_PAGINATION_PAGE_SIZE
-
-def filter_books_by_search(books, search_term=None):
-    if not search_term:
-        return books
-    
-    search_term = search_term.lower()
-    filtered_books = []
-    
-    for book in books:
-        if (search_term in book.title.lower() or 
-            search_term in book.author.lower() or 
-            search_term in str(book.year).lower()):
-            filtered_books.append(book)
-            
-    return filtered_books
 
 @router.get("/books")
 def get_books(
